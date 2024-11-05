@@ -5,7 +5,9 @@ pydot==1.4.1
 python-mnist
 streamlit==1.12.0
 streamlit-ace
-torch
+# torch
+torch==2.0.1
 watchdog==1.0.2
 altair==4.2.2
-networkx==3.3
+networkx==2.8.8
+# networkx==3.3
