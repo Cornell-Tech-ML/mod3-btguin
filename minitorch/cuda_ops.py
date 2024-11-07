@@ -564,7 +564,7 @@ def _tensor_matrix_multiply(
                 elif a_shape[idx] == 1:
                     a_index[idx] = 0  # Broadcasting dimension
                 else:
-                    a_index[idx] = 0  # Default to 0 for safety
+                    a_index[idx] = out_index[idx] % a_shape[idx]  # Handle broadcasting
 
             a_index[-2] = i     # Row index in A
             a_index[-1] = a_k   # Column index in A
@@ -583,7 +583,7 @@ def _tensor_matrix_multiply(
                 elif b_shape[idx] == 1:
                     b_index[idx] = 0  # Broadcasting dimension
                 else:
-                    b_index[idx] = 0  # Default to 0 for safety
+                    b_index[idx] = out_index[idx] % b_shape[idx]  # Handle broadcasting
 
             b_index[-2] = b_k   # Row index in B
             b_index[-1] = j     # Column index in B
