@@ -175,8 +175,6 @@ def tensor_map(
         i = cuda.blockIdx.x * cuda.blockDim.x + cuda.threadIdx.x
         # TODO: Implement for Task 3.3.
                 # Allocate local arrays for indices
-        out_index = cuda.local.array(MAX_DIMS, numba.int32)
-        in_index = cuda.local.array(MAX_DIMS, numba.int32)
         
         # Compute the global thread index
         i = cuda.blockIdx.x * cuda.blockDim.x + cuda.threadIdx.x
@@ -350,6 +348,7 @@ def tensor_reduce(
         BLOCK_DIM = 1024
         cache = cuda.shared.array(BLOCK_DIM, numba.float64)
         out_index = cuda.local.array(MAX_DIMS, numba.int32)
+        a_index = cuda.local.array(MAX_DIMS, numba.int32)  # Define a_index
         out_pos = cuda.blockIdx.x
         pos = cuda.threadIdx.x
 
