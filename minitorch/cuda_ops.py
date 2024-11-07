@@ -517,7 +517,7 @@ def _tensor_matrix_multiply(
     #    c) Compute the dot produce for position c[i, j]
     
     # TODO: Implement for Task 3.4.
-        # Dimensions
+    # Dimensions
     M = out_shape[-2]  # Number of rows in output
     N = out_shape[-1]  # Number of columns in output
     K = a_shape[-1]    # Shared dimension (columns of A / rows of B)
@@ -548,8 +548,8 @@ def _tensor_matrix_multiply(
     # Loop over tiles along the K dimension
     for tile_idx in range(num_tiles):
         # Compute global indices for tiles
-        a_k = tile_idx * BLOCK_DIM + pj  # Column index in A
-        b_k = tile_idx * BLOCK_DIM + pi  # Row index in B
+        a_k = tile_idx * BLOCK_DIM + pi  # Column index in A
+        b_k = tile_idx * BLOCK_DIM + pj  # Row index in B
 
         # Initialize shared memory elements to zero
         a_elem = 0.0
@@ -572,7 +572,7 @@ def _tensor_matrix_multiply(
             a_pos = index_to_position(a_index, a_strides)
             a_elem = a_storage[a_pos]
 
-        a_shared[pi, pj] = a_elem  # Store in shared memory
+        a_shared[pj, pi] = a_elem  # Store in shared memory
 
         # Load elements from B into shared memory
         if b_k < K and j < N:
@@ -591,7 +591,7 @@ def _tensor_matrix_multiply(
             b_pos = index_to_position(b_index, b_strides)
             b_elem = b_storage[b_pos]
 
-        b_shared[pi, pj] = b_elem  # Store in shared memory
+        b_shared[pj, pi] = b_elem  # Store in shared memory
 
         # Synchronize threads to ensure all data is loaded
         cuda.syncthreads()
@@ -599,7 +599,7 @@ def _tensor_matrix_multiply(
         # Compute the partial dot product
         for k in range(BLOCK_DIM):
             if (tile_idx * BLOCK_DIM + k) < K:
-                temp += a_shared[pi, k] * b_shared[k, pj]
+                temp += a_shared[pj, k] * b_shared[k, pi]
 
         # Synchronize before loading the next tile
         cuda.syncthreads()
