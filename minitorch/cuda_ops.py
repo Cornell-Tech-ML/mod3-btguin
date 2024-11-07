@@ -530,22 +530,22 @@ def _tensor_matrix_multiply(
 
     for tile_idx in range(num_tiles):
         # Compute indices for loading A and B tiles
-        a_k = tile_idx * BLOCK_DIM + ty
-        b_k = tile_idx * BLOCK_DIM + tx
+        a_k = tile_idx * BLOCK_DIM + pj
+        b_k = tile_idx * BLOCK_DIM + pi
 
         # Load A into shared memory
         if i < M and a_k < K:
             a_index = a_batch_stride * batch + a_strides[-2] * i + a_strides[-1] * a_k
-            a_shared[tx, ty] = a_storage[a_index]
+            a_shared[pi, pj] = a_storage[a_index]
         else:
-            a_shared[tx, ty] = 0.0
+            a_shared[pi, pj] = 0.0
 
         # Load B into shared memory
         if b_k < K and j < N:
             b_index = b_batch_stride * batch + b_strides[-2] * b_k + b_strides[-1] * j
-            b_shared[tx, ty] = b_storage[b_index]
+            b_shared[pi, pj] = b_storage[b_index]
         else:
-            b_shared[tx, ty] = 0.0
+            b_shared[pi, pj] = 0.0
 
         # Synchronize threads to ensure all data is loaded
         cuda.syncthreads()
@@ -553,7 +553,7 @@ def _tensor_matrix_multiply(
         # Compute the partial dot product
         for k in range(BLOCK_DIM):
             if tile_idx * BLOCK_DIM + k < K:
-                accum += a_shared[tx, k] * b_shared[k, ty]
+                accum += a_shared[pi, k] * b_shared[k, pj]
 
         # Synchronize before loading the next tile
         cuda.syncthreads()
