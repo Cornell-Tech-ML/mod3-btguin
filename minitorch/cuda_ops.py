@@ -522,92 +522,45 @@ def _tensor_matrix_multiply(
     N = out_shape[-1]  # Number of columns in output
     K = a_shape[-1]    # Shared dimension (columns of A / rows of B)
 
+    # Initialize accumulator
+    accum = 0.0
+
     # Number of tiles along the K dimension
     num_tiles = (K + BLOCK_DIM - 1) // BLOCK_DIM
 
-    # Initialize accumulator
-    temp = 0.0
-
-    # Prepare indices arrays
-    a_index = cuda.local.array(MAX_DIMS, numba.int32)
-    b_index = cuda.local.array(MAX_DIMS, numba.int32)
-    out_index = cuda.local.array(MAX_DIMS, numba.int32)
-
-    # Compute out_index for the current thread
-    for idx in range(len(out_shape)):
-        out_index[idx] = 0
-
-    # Handle batch dimensions
-    if len(out_shape) > 2:
-        out_index[0] = batch
-
-    # Set row and column indices
-    out_index[-2] = i  # Row index
-    out_index[-1] = j  # Column index
-
-    # Loop over tiles along the K dimension
     for tile_idx in range(num_tiles):
-        # Compute global indices for tiles
-        a_k = tile_idx * BLOCK_DIM + pi  # Column index in A
-        b_k = tile_idx * BLOCK_DIM + pj  # Row index in B
+        # Compute indices for loading A and B tiles
+        a_k = tile_idx * BLOCK_DIM + ty
+        b_k = tile_idx * BLOCK_DIM + tx
 
-        # Initialize shared memory elements to zero
-        a_elem = 0.0
-        b_elem = 0.0
-
-        # Load elements from A into shared memory
+        # Load A into shared memory
         if i < M and a_k < K:
-            # Compute a_index
-            for idx in range(len(a_shape)):
-                if a_shape[idx] == out_shape[idx]:
-                    a_index[idx] = out_index[idx]
-                elif a_shape[idx] == 1:
-                    a_index[idx] = 0  # Broadcasting dimension
-                else:
-                    a_index[idx] = out_index[idx] % a_shape[idx]  # Handle broadcasting
+            a_index = a_batch_stride * batch + a_strides[-2] * i + a_strides[-1] * a_k
+            a_shared[tx, ty] = a_storage[a_index]
+        else:
+            a_shared[tx, ty] = 0.0
 
-            a_index[-2] = i     # Row index in A
-            a_index[-1] = a_k   # Column index in A
-
-            a_pos = index_to_position(a_index, a_strides)
-            a_elem = a_storage[a_pos]
-
-        a_shared[pj, pi] = a_elem  # Store in shared memory
-
-        # Load elements from B into shared memory
+        # Load B into shared memory
         if b_k < K and j < N:
-            # Compute b_index
-            for idx in range(len(b_shape)):
-                if b_shape[idx] == out_shape[idx]:
-                    b_index[idx] = out_index[idx]
-                elif b_shape[idx] == 1:
-                    b_index[idx] = 0  # Broadcasting dimension
-                else:
-                    b_index[idx] = out_index[idx] % b_shape[idx]  # Handle broadcasting
-
-            b_index[-2] = b_k   # Row index in B
-            b_index[-1] = j     # Column index in B
-
-            b_pos = index_to_position(b_index, b_strides)
-            b_elem = b_storage[b_pos]
-
-        b_shared[pj, pi] = b_elem  # Store in shared memory
+            b_index = b_batch_stride * batch + b_strides[-2] * b_k + b_strides[-1] * j
+            b_shared[tx, ty] = b_storage[b_index]
+        else:
+            b_shared[tx, ty] = 0.0
 
         # Synchronize threads to ensure all data is loaded
         cuda.syncthreads()
 
         # Compute the partial dot product
         for k in range(BLOCK_DIM):
-            if (tile_idx * BLOCK_DIM + k) < K:
-                temp += a_shared[pj, k] * b_shared[k, pi]
+            if tile_idx * BLOCK_DIM + k < K:
+                accum += a_shared[tx, k] * b_shared[k, ty]
 
         # Synchronize before loading the next tile
         cuda.syncthreads()
 
     # Write the result to global memory
     if i < M and j < N:
-        out_pos = index_to_position(out_index, out_strides)
-        out[out_pos] = temp
-
+        out_index = out_strides[0] * batch + out_strides[-2] * i + out_strides[-1] * j
+        out[out_index] = accum
 
 tensor_matrix_multiply = jit(_tensor_matrix_multiply)
