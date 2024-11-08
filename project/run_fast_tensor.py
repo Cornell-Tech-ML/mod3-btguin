@@ -69,6 +69,8 @@ class FastTrain:
         optim = minitorch.SGD(self.model.parameters(), learning_rate)
         BATCH = 10
         losses = []
+        epoch_times = []  # Initialize list to store epoch times
+
 
         for epoch in range(max_epochs):
             start_time = time.time()  # Start timer for the epoch
@@ -95,6 +97,7 @@ class FastTrain:
 
             end_time = time.time()  # End timer for the epoch
             epoch_time = end_time - start_time  # Calculate epoch duration
+            epoch_times.append(epoch_time)  # Store epoch_time
             losses.append(total_loss)
 
             # Logging
@@ -105,6 +108,10 @@ class FastTrain:
                 y2 = minitorch.tensor(data.y)
                 correct = int(((out.detach() > 0.5) == y2).sum()[0])
                 log_fn(epoch, total_loss, correct, losses, epoch_time)  # Pass epoch_time
+
+            # Calculate average epoch time
+            average_epoch_time = sum(epoch_times) / len(epoch_times)
+            print(f"\nAverage Time per Epoch: {average_epoch_time:.4f} sec")
 
 
 if __name__ == "__main__":
