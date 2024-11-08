@@ -171,6 +171,7 @@ def tensor_map(
         in_strides: Strides,
     ) -> None:
         # TODO: Implement for Task 3.1.
+            # Calculate total number of elements
         size = 1
         for s in out_shape:
             size *= s
@@ -202,8 +203,8 @@ def tensor_map(
         else:
             # General case: need to compute indices
             for i in prange(size):
-                out_index = np.empty(MAX_DIMS, dtype=np.int32)
-                in_index = np.empty(MAX_DIMS, dtype=np.int32)
+                out_index = np.zeros(len(out_shape), dtype=np.int32)
+                in_index = np.zeros(len(in_shape), dtype=np.int32)
 
                 # Convert linear index to multi-dimensional index for output tensor
                 to_index(i, out_shape, out_index)
@@ -258,7 +259,7 @@ def tensor_zip(
         b_strides: Strides,
     ) -> None:
         # TODO: Implement for Task 3.1.
-        # Calculate total number of elements
+            # Calculate total number of elements
         size = 1
         for s in out_shape:
             size *= s
@@ -298,9 +299,9 @@ def tensor_zip(
         else:
             # General case
             for i in prange(size):
-                out_index = np.empty(MAX_DIMS, dtype=np.int32)
-                a_index = np.empty(MAX_DIMS, dtype=np.int32)
-                b_index = np.empty(MAX_DIMS, dtype=np.int32)
+                out_index = np.zeros(len(out_shape), dtype=np.int32)
+                a_index = np.zeros(len(a_shape), dtype=np.int32)
+                b_index = np.zeros(len(b_shape), dtype=np.int32)
 
                 # Convert linear index to multi-dimensional index for output tensor
                 to_index(i, out_shape, out_index)
@@ -353,15 +354,15 @@ def tensor_reduce(
         reduce_dim: int,
     ) -> None:
         # TODO: Implement for Task 3.1.
-        # Calculate total number of elements in the output tensor
+          # Calculate total number of elements in the output tensor
         size = 1
         for s in out_shape:
             size *= s
 
         # For each position in the output tensor
         for i in prange(size):
-            out_index = np.empty(MAX_DIMS, dtype=np.int32)
-            a_index = np.empty(MAX_DIMS, dtype=np.int32)
+            out_index = np.zeros(len(out_shape), dtype=np.int32)
+            a_index = np.zeros(len(a_shape), dtype=np.int32)
 
             # Convert linear index to multi-dimensional index
             to_index(i, out_shape, out_index)
@@ -373,7 +374,7 @@ def tensor_reduce(
             acc = out[out_pos]
 
             # Copy the output index to input index
-            for j in range(len(out_shape)):
+            for j in range(len(out_index)):
                 a_index[j] = out_index[j]
 
             # Iterate over the reduced dimension
@@ -384,7 +385,7 @@ def tensor_reduce(
 
             # Store the result
             out[out_pos] = acc
-            
+
     return njit(_reduce, parallel=True)  # type: ignore
 
 
