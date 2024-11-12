@@ -6,6 +6,9 @@ import minitorch
 
 import time
 
+from numba import cuda  # Ensure CUDA is imported
+
+
 
 datasets = minitorch.datasets
 FastTensorBackend = minitorch.TensorBackend(minitorch.FastOps)
@@ -89,6 +92,10 @@ class FastTrain:
                 # Forward
 
                 if self.backend.cuda:
+                    # Move tensors to GPU using to_cuda_()
+                    X._tensor.to_cuda_()
+                    y._tensor.to_cuda_()
+
                     print(f"X storage on device: {numba.cuda.is_cuda_array(X._tensor._storage)}")
                     print(f"y storage on device: {numba.cuda.is_cuda_array(y._tensor._storage)}")
 
