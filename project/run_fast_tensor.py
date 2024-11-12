@@ -96,9 +96,6 @@ class FastTrain:
                     X._tensor.to_cuda_()
                     y._tensor.to_cuda_()
 
-                    print(f"X storage on device: {numba.cuda.is_cuda_array(X._tensor._storage)}")
-                    print(f"y storage on device: {numba.cuda.is_cuda_array(y._tensor._storage)}")
-
                 out = self.model.forward(X).view(y.shape[0])
                 prob = (out * y) + (out - 1.0) * (y - 1.0)
                 loss = -prob.log()

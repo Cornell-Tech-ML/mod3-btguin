@@ -173,7 +173,6 @@ def tensor_map(
         out_index = cuda.local.array(MAX_DIMS, numba.int32)
         in_index = cuda.local.array(MAX_DIMS, numba.int32)
         i = cuda.blockIdx.x * cuda.blockDim.x + cuda.threadIdx.x
-
         if i < out_size:
             to_index(i, out_shape, out_index)
             broadcast_index(out_index, out_shape, in_shape, in_index)
@@ -325,34 +324,22 @@ def tensor_reduce(
         BLOCK_DIM = 1024
         cache = cuda.shared.array(BLOCK_DIM, numba.float64)
         out_index = cuda.local.array(MAX_DIMS, numba.int32)
-        a_index = cuda.local.array(MAX_DIMS, numba.int32)  # Define a_index
-        out_pos = cuda.blockIdx.x
         pos = cuda.threadIdx.x
 
         # TODO: Implement for Task 3.3.
-        # Initialize the cache with the starting reduce value
         cache[pos] = reduce_value
-
-        if out_pos < out_size:
-            # Convert the linear index to a multi-dimensional index
-            to_index(out_pos, out_shape, out_index)
-
-            # Modify the index along the reduction dimension
+        if cuda.blockIdx.x < out_size:
+            to_index(cuda.blockIdx.x, out_shape, out_index)
+            dim = a_shape[reduce_dim]
             out_index[reduce_dim] = out_index[reduce_dim] * BLOCK_DIM + pos
 
-            # Check if the modified index is within bounds
-            dim = a_shape[reduce_dim]
             if out_index[reduce_dim] < dim:
-                # Load the element to be reduced into shared memory
                 cache[pos] = a_storage[index_to_position(out_index, a_strides)]
             else:
-                # If out of bounds, keep the initial reduce value
                 cache[pos] = reduce_value
 
-            # Synchronize to ensure all threads have loaded their elements
             cuda.syncthreads()
 
-            # Perform the reduction in shared memory using a tree-based approach
             idx = 0
             while (2 ** idx) < BLOCK_DIM:
                 if pos % ((2 ** idx) * 2) == 0 and (pos + (2 ** idx)) < BLOCK_DIM:
@@ -360,11 +347,9 @@ def tensor_reduce(
                 cuda.syncthreads()
                 idx += 1
 
-            # The first thread writes the result to the output tensor
             if pos == 0:
-                out_pos_idx = index_to_position(out_index, out_strides)
-                out[out_pos_idx] = cache[0]
-    
+                out[index_to_position(out_index, out_strides)] = cache[0]
+
     return cuda.jit()(_reduce)
     # return jit(_reduce)  # type: ignore
 
