@@ -161,6 +161,7 @@ def tensor_map(
 
     """
 
+    @cuda.jit
     def _map(
         out: Storage,
         out_shape: Shape,
@@ -193,7 +194,7 @@ def tensor_map(
             # Apply the function
             out[out_pos] = fn(in_storage[in_pos])
 
-    return cuda.jit()(_map)  # type: ignore
+    return _map  # type: ignore
 
 
 def tensor_zip(
@@ -216,6 +217,7 @@ def tensor_zip(
 
     """
 
+    @cuda.jit
     def _zip(
         out: Storage,
         out_shape: Shape,
@@ -254,7 +256,7 @@ def tensor_zip(
             # Apply the function
             out[out_pos] = fn(a_storage[a_pos], b_storage[b_pos])
 
-    return cuda.jit()(_zip)  # type: ignore
+    return _zip  # type: ignore
 
 
 def _sum_practice(out: Storage, a: Storage, size: int) -> None:
@@ -334,6 +336,7 @@ def tensor_reduce(
 
     """
 
+    @cuda.jit
     def _reduce(
         out: Storage,
         out_shape: Shape,
@@ -392,10 +395,7 @@ def tensor_reduce(
                 out_pos = index_to_position(out_index, out_strides)
                 out[out_pos] = cache[0]
 
-    return _reduce
-    
-    return cuda.jit()(_reduce)
-    # return jit(_reduce)  # type: ignore
+    return _reduce  # type: ignore
 
 
 def _mm_practice(out: Storage, a: Storage, b: Storage, size: int) -> None:
@@ -580,4 +580,4 @@ def _tensor_matrix_multiply(
         )
         out[out_index] = accum
 
-tensor_matrix_multiply = jit(_tensor_matrix_multiply)
+tensor_matrix_multiply = _tensor_matrix_multiply
