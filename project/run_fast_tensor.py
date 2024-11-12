@@ -19,6 +19,8 @@ def default_log_fn(epoch, total_loss, correct, losses, epoch_time):
 
 def RParam(*shape, backend):
     r = minitorch.rand(shape, backend=backend) - 0.5
+    if backend.cuda: # added this
+        r._tensor.to_cuda_() # added this
     return minitorch.Parameter(r)
 
 
@@ -44,6 +46,8 @@ class Linear(minitorch.Module):
         self.weights = RParam(in_size, out_size, backend=backend)
         s = minitorch.zeros((out_size,), backend=backend)
         s = s + 0.1
+        if backend.cuda: # added this
+            s._tensor.to_cuda_() # added this
         self.bias = minitorch.Parameter(s)
         self.out_size = out_size
 
