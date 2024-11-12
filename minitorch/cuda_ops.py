@@ -489,50 +489,40 @@ def _tensor_matrix_multiply(
     #    c) Compute the dot produce for position c[i, j]
     
     # TODO: Implement for Task 3.4.
-    # Dimensions
-    M = out_shape[-2]  # Number of rows in output
-    N = out_shape[-1]  # Number of columns in output
-    K = a_shape[-1]    # Shared dimension (columns of A / rows of B)
-
-    # Initialize accumulator
     accum = 0.0
-
-    # Number of tiles along the K dimension
-    num_tiles = (K + BLOCK_DIM - 1) // BLOCK_DIM
-
-    for tile_idx in range(num_tiles):
-        # Compute indices for loading A and B tiles
-        a_k = tile_idx * BLOCK_DIM + pj
-        b_k = tile_idx * BLOCK_DIM + pi
+    for idx in range(0, a_shape[2], BLOCK_DIM):
+        # Absolute index along K dimension
+        k_a = idx + pj
+        k_b = idx + pi
 
         # Load A into shared memory
-        if i < M and a_k < K:
-            a_index = a_batch_stride * batch + a_strides[-2] * i + a_strides[-1] * a_k
+        if i < a_shape[1] and k_a < a_shape[2]:
+            a_index = a_batch_stride * batch + a_strides[1] * i + a_strides[2] * k_a
             a_shared[pi, pj] = a_storage[a_index]
         else:
             a_shared[pi, pj] = 0.0
 
         # Load B into shared memory
-        if b_k < K and j < N:
-            b_index = b_batch_stride * batch + b_strides[-2] * b_k + b_strides[-1] * j
+        if j < b_shape[2] and k_b < b_shape[1]:
+            b_index = b_batch_stride * batch + b_strides[2] * j + b_strides[1] * k_b
             b_shared[pi, pj] = b_storage[b_index]
         else:
             b_shared[pi, pj] = 0.0
 
-        # Synchronize threads to ensure all data is loaded
+        # Synchronize to ensure all data is loaded
         cuda.syncthreads()
 
-        # Compute the partial dot product
+        # Perform partial dot product
         for k in range(BLOCK_DIM):
-            if tile_idx * BLOCK_DIM + k < K:
+            if (idx + k) < a_shape[2]:
                 accum += a_shared[pi, k] * b_shared[k, pj]
 
         # Synchronize before loading the next tile
         cuda.syncthreads()
 
     # Write the result to global memory
-    if i < M and j < N:
-        out_index = out_strides[0] * batch + out_strides[-2] * i + out_strides[-1] * j
+    if i < out_shape[1] and j < out_shape[2]:
+        out_index = out_strides[0] * batch + out_strides[1] * i + out_strides[2] * j
         out[out_index] = accum
 
-tensor_matrix_multiply = jit(_tensor_matrix_multiply)
+tensor_matrix_multiply = cuda.jit(_tensor_matrix_multiply)
