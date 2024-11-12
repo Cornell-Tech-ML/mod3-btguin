@@ -170,40 +170,28 @@ def tensor_map(
         in_shape: Shape,
         in_strides: Strides,
     ) -> None:
-        # Allocate local arrays for indices
         out_index = cuda.local.array(MAX_DIMS, numba.int32)
         in_index = cuda.local.array(MAX_DIMS, numba.int32)
-
-        # Copy shapes and strides into local variables to avoid host array usage
-        out_shape_local = cuda.local.array(MAX_DIMS, numba.int32)  # Edited line
-        out_strides_local = cuda.local.array(MAX_DIMS, numba.int32)  # Edited line
-        in_shape_local = cuda.local.array(MAX_DIMS, numba.int32)  # Edited line
-        in_strides_local = cuda.local.array(MAX_DIMS, numba.int32)  # Edited line
-
-        # Copy the values from host arrays to local arrays
-        for d in range(len(out_shape)):  # Edited line
-            out_shape_local[d] = out_shape[d]  # Edited line
-            out_strides_local[d] = out_strides[d]  # Edited line
-        for d in range(len(in_shape)):  # Edited line
-            in_shape_local[d] = in_shape[d]  # Edited line
-            in_strides_local[d] = in_strides[d]  # Edited line
-
+        i = cuda.blockIdx.x * cuda.blockDim.x + cuda.threadIdx.x
+        # TODO: Implement for Task 3.3.
+                # Allocate local arrays for indices
+        
         # Compute the global thread index
         i = cuda.blockIdx.x * cuda.blockDim.x + cuda.threadIdx.x
-
+        
         if i < out_size:
             # Convert linear index to multi-dimensional index
-            to_index(i, out_shape_local, out_index)  # Edited line
-
+            to_index(i, out_shape, out_index)
+            
             # Compute position in output storage
-            out_pos = index_to_position(out_index, out_strides_local)  # Edited line
-
+            out_pos = index_to_position(out_index, out_strides)
+            
             # Broadcast index to input tensor shape
-            broadcast_index(out_index, out_shape_local, in_shape_local, in_index)  # Edited line
-
+            broadcast_index(out_index, out_shape, in_shape, in_index)
+            
             # Compute position in input storage
-            in_pos = index_to_position(in_index, in_strides_local)  # Edited line
-
+            in_pos = index_to_position(in_index, in_strides)
+            
             # Apply the function
             out[out_pos] = fn(in_storage[in_pos])
 
@@ -242,48 +230,27 @@ def tensor_zip(
         b_shape: Shape,
         b_strides: Strides,
     ) -> None:
-        # Allocate local arrays for indices
         out_index = cuda.local.array(MAX_DIMS, numba.int32)
         a_index = cuda.local.array(MAX_DIMS, numba.int32)
         b_index = cuda.local.array(MAX_DIMS, numba.int32)
-
-        # Copy shapes and strides into local variables to avoid host array usage
-        out_shape_local = cuda.local.array(MAX_DIMS, numba.int32)  # Edited line
-        out_strides_local = cuda.local.array(MAX_DIMS, numba.int32)  # Edited line
-        a_shape_local = cuda.local.array(MAX_DIMS, numba.int32)  # Edited line
-        a_strides_local = cuda.local.array(MAX_DIMS, numba.int32)  # Edited line
-        b_shape_local = cuda.local.array(MAX_DIMS, numba.int32)  # Edited line
-        b_strides_local = cuda.local.array(MAX_DIMS, numba.int32)  # Edited line
-
-        # Copy the values from host arrays to local arrays
-        for d in range(len(out_shape)):  # Edited line
-            out_shape_local[d] = out_shape[d]  # Edited line
-            out_strides_local[d] = out_strides[d]  # Edited line
-        for d in range(len(a_shape)):  # Edited line
-            a_shape_local[d] = a_shape[d]  # Edited line
-            a_strides_local[d] = a_strides[d]  # Edited line
-        for d in range(len(b_shape)):  # Edited line
-            b_shape_local[d] = b_shape[d]  # Edited line
-            b_strides_local[d] = b_strides[d]  # Edited line
-
-        # Compute the global thread index
         i = cuda.blockIdx.x * cuda.blockDim.x + cuda.threadIdx.x
 
+        # TODO: Implement for Task 3.3.
         if i < out_size:
             # Convert linear index to multi-dimensional index
-            to_index(i, out_shape_local, out_index)  # Edited line
-
+            to_index(i, out_shape, out_index)
+            
             # Compute position in output storage
-            out_pos = index_to_position(out_index, out_strides_local)  # Edited line
-
+            out_pos = index_to_position(out_index, out_strides)
+            
             # Broadcast index to input tensor A
-            broadcast_index(out_index, out_shape_local, a_shape_local, a_index)  # Edited line
-            a_pos = index_to_position(a_index, a_strides_local)  # Edited line
-
+            broadcast_index(out_index, out_shape, a_shape, a_index)
+            a_pos = index_to_position(a_index, a_strides)
+            
             # Broadcast index to input tensor B
-            broadcast_index(out_index, out_shape_local, b_shape_local, b_index)  # Edited line
-            b_pos = index_to_position(b_index, b_strides_local)  # Edited line
-
+            broadcast_index(out_index, out_shape, b_shape, b_index)
+            b_pos = index_to_position(b_index, b_strides)
+            
             # Apply the function
             out[out_pos] = fn(a_storage[a_pos], b_storage[b_pos])
 
@@ -379,64 +346,47 @@ def tensor_reduce(
         reduce_value: float,
     ) -> None:
         BLOCK_DIM = 1024
-        # Shared memory for intermediate results
         cache = cuda.shared.array(BLOCK_DIM, numba.float64)
-        # Allocate local arrays for indices
         out_index = cuda.local.array(MAX_DIMS, numba.int32)
-        a_index = cuda.local.array(MAX_DIMS, numba.int32)
-
-        # Copy shapes and strides into local variables to avoid host array usage
-        out_shape_local = cuda.local.array(MAX_DIMS, numba.int32)  # Edited line
-        out_strides_local = cuda.local.array(MAX_DIMS, numba.int32)  # Edited line
-        a_shape_local = cuda.local.array(MAX_DIMS, numba.int32)  # Edited line
-        a_strides_local = cuda.local.array(MAX_DIMS, numba.int32)  # Edited line
-
-        # Copy the values from host arrays to local arrays
-        for d in range(len(out_shape)):  # Edited line
-            out_shape_local[d] = out_shape[d]  # Edited line
-            out_strides_local[d] = out_strides[d]  # Edited line
-        for d in range(len(a_shape)):  # Edited line
-            a_shape_local[d] = a_shape[d]  # Edited line
-            a_strides_local[d] = a_strides[d]  # Edited line
-
-        # Compute positions
+        a_index = cuda.local.array(MAX_DIMS, numba.int32)  # Define a_index
         out_pos = cuda.blockIdx.x
         pos = cuda.threadIdx.x
 
+        # TODO: Implement for Task 3.3.
         if out_pos < out_size:
             # Convert block index to multi-dimensional index for output
-            to_index(out_pos, out_shape_local, out_index)  # Edited line
-
+            to_index(out_pos, out_shape, out_index)
+            
             # Copy out_index to a_index
-            for d in range(len(out_shape_local)):  # Edited line
+            for d in range(len(out_shape)):
                 a_index[d] = out_index[d]
-
-            # Compute the size along the reduction dimension
-            reduce_size = a_shape_local[reduce_dim]  # Edited line
+            
+            # Compute the start position in the reduction dimension
+            reduce_size = a_shape[reduce_dim]
             i = pos
             temp = reduce_value
-
+            
             while i < reduce_size:
                 a_index[reduce_dim] = i
-                a_pos = index_to_position(a_index, a_strides_local)  # Edited line
+                a_pos = index_to_position(a_index, a_strides)
                 temp = fn(temp, a_storage[a_pos])
                 i += BLOCK_DIM
-
+            
             cache[pos] = temp
             cuda.syncthreads()
-
-            # Perform parallel reduction within the block
+            
+            # Reduction within block
             stride = BLOCK_DIM // 2
             while stride > 0:
                 if pos < stride:
                     cache[pos] = fn(cache[pos], cache[pos + stride])
                 cuda.syncthreads()
                 stride //= 2
-
-            # Write the result to the output tensor
+            
+            # Write result to output
             if pos == 0:
                 out_index[reduce_dim] = 0
-                out_pos = index_to_position(out_index, out_strides_local)  # Edited line
+                out_pos = index_to_position(out_index, out_strides)
                 out[out_pos] = cache[0]
     
     return cuda.jit()(_reduce)
@@ -543,46 +493,34 @@ def _tensor_matrix_multiply(
     Returns:
         None : Fills in `out`
     """
-    # Batch strides
     a_batch_stride = a_strides[0] if a_shape[0] > 1 else 0
     b_batch_stride = b_strides[0] if b_shape[0] > 1 else 0
-    # Batch dimension
+    # Batch dimension - fixed
     batch = cuda.blockIdx.z
 
     BLOCK_DIM = 32
-    # Shared memory for tiles
     a_shared = cuda.shared.array((BLOCK_DIM, BLOCK_DIM), numba.float64)
     b_shared = cuda.shared.array((BLOCK_DIM, BLOCK_DIM), numba.float64)
 
-    # Thread indices
+    # The final position c[i, j]
     i = cuda.blockIdx.x * cuda.blockDim.x + cuda.threadIdx.x
     j = cuda.blockIdx.y * cuda.blockDim.y + cuda.threadIdx.y
+
+    # The local position in the block.
     pi = cuda.threadIdx.x
     pj = cuda.threadIdx.y
 
-    # Copy shapes and strides into local variables to avoid host array usage
-    out_shape_local = cuda.local.array(MAX_DIMS, numba.int32)  # Edited line
-    out_strides_local = cuda.local.array(MAX_DIMS, numba.int32)  # Edited line
-    a_shape_local = cuda.local.array(MAX_DIMS, numba.int32)  # Edited line
-    a_strides_local = cuda.local.array(MAX_DIMS, numba.int32)  # Edited line
-    b_shape_local = cuda.local.array(MAX_DIMS, numba.int32)  # Edited line
-    b_strides_local = cuda.local.array(MAX_DIMS, numba.int32)  # Edited line
-
-    # Copy the values from host arrays to local arrays
-    for d in range(len(out_shape)):  # Edited line
-        out_shape_local[d] = out_shape[d]  # Edited line
-        out_strides_local[d] = out_strides[d]  # Edited line
-    for d in range(len(a_shape)):  # Edited line
-        a_shape_local[d] = a_shape[d]  # Edited line
-        a_strides_local[d] = a_strides[d]  # Edited line
-    for d in range(len(b_shape)):  # Edited line
-        b_shape_local[d] = b_shape[d]  # Edited line
-        b_strides_local[d] = b_strides[d]  # Edited line
-
+    # Code Plan:
+    # 1) Move across shared dimension by block dim.
+    #    a) Copy into shared memory for a matrix.
+    #    b) Copy into shared memory for b matrix
+    #    c) Compute the dot produce for position c[i, j]
+    
+    # TODO: Implement for Task 3.4.
     # Dimensions
-    M = out_shape_local[-2]  # Edited line
-    N = out_shape_local[-1]  # Edited line
-    K = a_shape_local[-1]    # Edited line
+    M = out_shape[-2]  # Number of rows in output
+    N = out_shape[-1]  # Number of columns in output
+    K = a_shape[-1]    # Shared dimension (columns of A / rows of B)
 
     # Initialize accumulator
     accum = 0.0
@@ -597,22 +535,14 @@ def _tensor_matrix_multiply(
 
         # Load A into shared memory
         if i < M and a_k < K:
-            a_index = (
-                a_batch_stride * batch
-                + a_strides_local[-2] * i
-                + a_strides_local[-1] * a_k
-            )  # Edited line
+            a_index = a_batch_stride * batch + a_strides[-2] * i + a_strides[-1] * a_k
             a_shared[pi, pj] = a_storage[a_index]
         else:
             a_shared[pi, pj] = 0.0
 
         # Load B into shared memory
         if b_k < K and j < N:
-            b_index = (
-                b_batch_stride * batch
-                + b_strides_local[-2] * b_k
-                + b_strides_local[-1] * j
-            )  # Edited line
+            b_index = b_batch_stride * batch + b_strides[-2] * b_k + b_strides[-1] * j
             b_shared[pi, pj] = b_storage[b_index]
         else:
             b_shared[pi, pj] = 0.0
@@ -630,11 +560,7 @@ def _tensor_matrix_multiply(
 
     # Write the result to global memory
     if i < M and j < N:
-        out_index = (
-            out_strides_local[0] * batch
-            + out_strides_local[-2] * i
-            + out_strides_local[-1] * j
-        )  # Edited line
+        out_index = out_strides[0] * batch + out_strides[-2] * i + out_strides[-1] * j
         out[out_index] = accum
 
 tensor_matrix_multiply = jit(_tensor_matrix_multiply)
