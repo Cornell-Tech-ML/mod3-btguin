@@ -469,7 +469,7 @@ def mm_practice(a: Tensor, b: Tensor) -> TensorData:
     )
     return out
 
-
+@cuda.jit
 def _tensor_matrix_multiply(
     out: Storage,
     out_shape: Shape,
