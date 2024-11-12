@@ -53,9 +53,9 @@ class Linear(minitorch.Module):
     def forward(self, x):
         # TODO: Implement for Task 3.5.
         x = x.view(*x.shape, 1)
-        w = self.weights.value.view(1, *self.weights.value.shape)
+        weights = self.weights.value.view(1, *self.weights.value.shape)
         bias = self.bias.value.view(1, self.out_size)
-        return (x * w).sum(1).view(x.shape[0], self.out_size) + bias
+        return (x * weights).sum(1).view(x.shape[0], self.out_size) + bias
 
 
 class FastTrain:
@@ -95,6 +95,9 @@ class FastTrain:
                     # Move tensors to GPU using to_cuda_()
                     X._tensor.to_cuda_()
                     y._tensor.to_cuda_()
+
+                    print(f"X storage on device: {numba.cuda.is_cuda_array(X._tensor._storage)}")
+                    print(f"y storage on device: {numba.cuda.is_cuda_array(y._tensor._storage)}")
 
                 out = self.model.forward(X).view(y.shape[0])
                 prob = (out * y) + (out - 1.0) * (y - 1.0)

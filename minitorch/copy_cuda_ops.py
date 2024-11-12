@@ -14,7 +14,7 @@ from .tensor_data import (
     Strides,
     TensorData,
     broadcast_index,
-    index_to_position,
+    index_to_pos,
     shape_broadcast,
     to_index,
 )
@@ -38,7 +38,7 @@ def jit(fn, **kwargs) -> FakeCUDAKernel:
 
 
 to_index = device_jit(to_index)
-index_to_position = device_jit(index_to_position)
+index_to_position = device_jit(index_to_pos)
 broadcast_index = device_jit(broadcast_index)
 
 THREADS_PER_BLOCK = 32
