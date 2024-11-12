@@ -88,11 +88,6 @@ class FastTrain:
                 y = minitorch.tensor(y_shuf[i : i + BATCH], backend=self.backend)
                 # Forward
 
-                # Move data to GPU if using GPU backend
-                if self.backend.cuda:
-                    X._tensor.to_cuda_()
-                    y._tensor.to_cuda_()
-
                 out = self.model.forward(X).view(y.shape[0])
                 prob = (out * y) + (out - 1.0) * (y - 1.0)
                 loss = -prob.log()
@@ -112,12 +107,6 @@ class FastTrain:
             if epoch % 10 == 0 or epoch == max_epochs:
                 X = minitorch.tensor(data.X, backend=self.backend)
                 y = minitorch.tensor(data.y, backend=self.backend)
-
-                # Move data to GPU if using GPU backend
-                if self.backend.cuda:
-                    X._tensor.to_cuda_()
-                    y._tensor.to_cuda_()
-
                 out = self.model.forward(X).view(y.shape[0])
                 y2 = minitorch.tensor(data.y)
                 correct = int(((out.detach() > 0.5) == y2).sum()[0])
