@@ -19,8 +19,6 @@ def default_log_fn(epoch, total_loss, correct, losses, epoch_time):
 
 def RParam(*shape, backend):
     r = minitorch.rand(shape, backend=backend) - 0.5
-    if backend.cuda: # added this
-        r._tensor.to_cuda_() # added this
     return minitorch.Parameter(r)
 
 
@@ -46,8 +44,6 @@ class Linear(minitorch.Module):
         self.weights = RParam(in_size, out_size, backend=backend)
         s = minitorch.zeros((out_size,), backend=backend)
         s = s + 0.1
-        if backend.cuda: # added this
-            s._tensor.to_cuda_() # added this
         self.bias = minitorch.Parameter(s)
         self.out_size = out_size
 
@@ -92,10 +88,10 @@ class FastTrain:
                 y = minitorch.tensor(y_shuf[i : i + BATCH], backend=self.backend)
                 # Forward
 
-                # Move data to GPU if using GPU backend
+                # Manually move data to GPU if using GPU backend
                 if self.backend.cuda:
-                    X._tensor.to_cuda_()
-                    y._tensor.to_cuda_()
+                    X._tensor._storage = cuda.to_device(X._tensor._storage)
+                    y._tensor._storage = cuda.to_device(y._tensor._storage)
 
                 out = self.model.forward(X).view(y.shape[0])
                 prob = (out * y) + (out - 1.0) * (y - 1.0)
@@ -117,10 +113,10 @@ class FastTrain:
                 X = minitorch.tensor(data.X, backend=self.backend)
                 y = minitorch.tensor(data.y, backend=self.backend)
 
-                # Move data to GPU if using GPU backend
+                # Move data to GPU for evaluation
                 if self.backend.cuda:
-                    X._tensor.to_cuda_()
-                    y._tensor.to_cuda_()
+                    X._tensor._storage = cuda.to_device(X._tensor._storage)
+                    y._tensor._storage = cuda.to_device(y._tensor._storage)
 
                 out = self.model.forward(X).view(y.shape[0])
                 y2 = minitorch.tensor(data.y)
