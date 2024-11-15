@@ -564,3 +564,27 @@ def _tensor_matrix_multiply(
         out[out_index] = accum
 
 tensor_matrix_multiply = jit(_tensor_matrix_multiply)
+
+
+    # Code Plan:
+    # 1) Move across shared dimension by block dim.
+    #    a) Copy into shared memory for a matrix.
+    #    b) Copy into shared memory for b matrix
+    #    c) Compute the dot produce for position c[i, j]
+    # TODO: Implement for Task 3.4.
+#     sum = 0.0
+#     for index in range(0, a_shape[2], BLOCK_DIM):
+#         temp = index + pj
+#         if i < a_shape[1] and temp < a_shape[2]:
+#             a_shared[pi, pj] = a_storage[a_batch_stride * batch + a_strides[1] * i + a_strides[2] * temp]
+#         temp = index + pi
+#         if j < b_shape[2] and temp < b_shape[1]:
+#             b_shared[pi, pj] = b_storage[b_batch_stride * batch + b_strides[2] * j + b_strides[1] * temp]
+#         cuda.syncthreads()
+#         for temp in range(BLOCK_DIM):
+#             if( index + temp ) < a_shape[2]:
+#                 sum += a_shared[pi, temp] * b_shared[temp, pj]
+#     if i < out_shape[1] and j < out_shape[2]:
+#         out[out_strides[0] * batch + out_strides[1] * i + out_strides[2] * j] = sum
+
+# tensor_matrix_multiply = cuda.jit(_tensor_matrix_multiply)

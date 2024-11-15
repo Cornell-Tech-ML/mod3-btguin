@@ -36,9 +36,9 @@ class Network(minitorch.Module):
 
     def forward(self, x):
         # TODO: Implement for Task 3.5.
-        x = self.layer1.forward(x).relu()
-        x = self.layer2.forward(x).relu()
-        return self.layer3.forward(x).sigmoid()
+        y = self.layer1.forward(x).relu()
+        z = self.layer2.forward(y).relu()
+        return self.layer3.forward(z).sigmoid()
 
 
 class Linear(minitorch.Module):
@@ -52,10 +52,7 @@ class Linear(minitorch.Module):
 
     def forward(self, x):
         # TODO: Implement for Task 3.5.
-        x = x.view(*x.shape, 1)
-        weights = self.weights.value.view(1, *self.weights.value.shape)
-        bias = self.bias.value.view(1, self.out_size)
-        return (x * weights).sum(1).view(x.shape[0], self.out_size) + bias
+        return x @ self.weights.value + self.bias.value
 
 
 class FastTrain:
