@@ -346,6 +346,118 @@ Epoch 490 | Loss: 0.0472 | Correct: 50 | Time: 2.3947 sec
 
 Average Time per Epoch: 2.1084 sec
 
+Bigger models
+
+run_fast_tensor.py --BACKEND cpu --HIDDEN 200 --DATASET simple --RATE 0.05
+
+Epoch 0 | Loss: 3.4191 | Correct: 45 | Time: 20.6011 sec
+Epoch 10 | Loss: 0.7426 | Correct: 50 | Time: 0.2978 sec
+Epoch 20 | Loss: 0.8394 | Correct: 50 | Time: 0.5665 sec
+Epoch 30 | Loss: 0.7098 | Correct: 50 | Time: 0.2886 sec
+Epoch 40 | Loss: 0.0589 | Correct: 50 | Time: 0.2807 sec
+Epoch 50 | Loss: 0.5642 | Correct: 50 | Time: 0.2952 sec
+Epoch 60 | Loss: 0.2042 | Correct: 50 | Time: 0.3007 sec
+Epoch 70 | Loss: 0.1508 | Correct: 50 | Time: 0.2948 sec
+Epoch 80 | Loss: 0.4018 | Correct: 50 | Time: 0.2864 sec
+Epoch 90 | Loss: 0.2298 | Correct: 50 | Time: 0.2868 sec
+Epoch 100 | Loss: 0.0107 | Correct: 50 | Time: 0.2820 sec
+Epoch 110 | Loss: 0.1088 | Correct: 50 | Time: 0.2839 sec
+Epoch 120 | Loss: 0.0259 | Correct: 50 | Time: 0.2865 sec
+Epoch 130 | Loss: 0.2226 | Correct: 50 | Time: 0.2839 sec
+Epoch 140 | Loss: 0.0139 | Correct: 50 | Time: 0.2837 sec
+Epoch 150 | Loss: 0.0524 | Correct: 50 | Time: 0.2988 sec
+Epoch 160 | Loss: 0.0362 | Correct: 50 | Time: 0.2919 sec
+Epoch 170 | Loss: 0.0363 | Correct: 50 | Time: 0.3659 sec
+Epoch 180 | Loss: 0.1745 | Correct: 50 | Time: 0.2815 sec
+Epoch 190 | Loss: 0.0437 | Correct: 50 | Time: 0.2799 sec
+Epoch 200 | Loss: 0.0277 | Correct: 50 | Time: 0.2842 sec
+Epoch 210 | Loss: 0.0109 | Correct: 50 | Time: 0.5908 sec
+Epoch 220 | Loss: 0.0370 | Correct: 50 | Time: 0.2840 sec
+Epoch 230 | Loss: 0.0838 | Correct: 50 | Time: 0.2962 sec
+Epoch 240 | Loss: 0.0157 | Correct: 50 | Time: 0.2909 sec
+Epoch 250 | Loss: 0.0727 | Correct: 50 | Time: 0.5752 sec
+Epoch 260 | Loss: 0.0213 | Correct: 50 | Time: 0.2824 sec
+Epoch 270 | Loss: 0.1119 | Correct: 50 | Time: 0.2878 sec
+Epoch 280 | Loss: 0.0311 | Correct: 50 | Time: 0.2818 sec
+Epoch 290 | Loss: 0.0221 | Correct: 50 | Time: 0.4724 sec
+Epoch 300 | Loss: 0.0053 | Correct: 50 | Time: 0.2980 sec
+Epoch 310 | Loss: 0.0070 | Correct: 50 | Time: 0.2965 sec
+Epoch 320 | Loss: 0.0447 | Correct: 50 | Time: 0.2839 sec
+Epoch 330 | Loss: 0.0695 | Correct: 50 | Time: 0.5131 sec
+Epoch 340 | Loss: 0.0186 | Correct: 50 | Time: 0.2851 sec
+Epoch 350 | Loss: 0.0562 | Correct: 50 | Time: 0.2870 sec
+Epoch 360 | Loss: 0.0563 | Correct: 50 | Time: 0.2880 sec
+Epoch 370 | Loss: 0.0038 | Correct: 50 | Time: 0.2857 sec
+Epoch 380 | Loss: 0.0027 | Correct: 50 | Time: 0.2984 sec
+Epoch 390 | Loss: 0.0045 | Correct: 50 | Time: 0.2971 sec
+Epoch 400 | Loss: 0.0881 | Correct: 50 | Time: 0.2961 sec
+Epoch 410 | Loss: 0.0051 | Correct: 50 | Time: 0.2979 sec
+Epoch 420 | Loss: 0.0215 | Correct: 50 | Time: 0.2846 sec
+Epoch 430 | Loss: 0.0009 | Correct: 50 | Time: 0.2806 sec
+Epoch 440 | Loss: 0.0038 | Correct: 50 | Time: 0.2822 sec
+Epoch 450 | Loss: 0.0223 | Correct: 50 | Time: 0.2877 sec
+Epoch 460 | Loss: 0.0030 | Correct: 50 | Time: 0.2861 sec
+Epoch 470 | Loss: 0.0169 | Correct: 50 | Time: 0.2962 sec
+Epoch 480 | Loss: 0.0306 | Correct: 50 | Time: 0.2814 sec
+Epoch 490 | Loss: 0.0284 | Correct: 50 | Time: 0.2961 sec
+
+Average Time per Epoch: 0.3633 sec
+
+run_fast_tensor.py --BACKEND gpu --HIDDEN 200 --DATASET simple --RATE 0.05
+
+Epoch 0 | Loss: 8.1230 | Correct: 22 | Time: 5.0145 sec
+Epoch 10 | Loss: 0.5206 | Correct: 48 | Time: 1.9990 sec
+Epoch 20 | Loss: 0.5556 | Correct: 49 | Time: 2.0865 sec
+Epoch 30 | Loss: 0.7699 | Correct: 49 | Time: 2.4500 sec
+Epoch 40 | Loss: 1.2071 | Correct: 50 | Time: 2.0857 sec
+Epoch 50 | Loss: 1.1223 | Correct: 50 | Time: 2.0899 sec
+Epoch 60 | Loss: 0.1752 | Correct: 50 | Time: 2.0412 sec
+Epoch 70 | Loss: 0.0239 | Correct: 49 | Time: 2.0905 sec
+Epoch 80 | Loss: 0.0883 | Correct: 49 | Time: 2.4220 sec
+Epoch 90 | Loss: 0.1437 | Correct: 49 | Time: 2.1121 sec
+Epoch 100 | Loss: 0.0349 | Correct: 50 | Time: 2.0185 sec
+Epoch 110 | Loss: 0.0678 | Correct: 50 | Time: 2.0158 sec
+Epoch 120 | Loss: 0.0507 | Correct: 50 | Time: 2.9160 sec
+Epoch 130 | Loss: 0.0250 | Correct: 50 | Time: 2.0225 sec
+Epoch 140 | Loss: 0.0556 | Correct: 50 | Time: 2.0207 sec
+Epoch 150 | Loss: 0.2490 | Correct: 50 | Time: 2.0882 sec
+Epoch 160 | Loss: 0.0277 | Correct: 50 | Time: 2.7499 sec
+Epoch 170 | Loss: 0.0172 | Correct: 50 | Time: 2.0383 sec
+Epoch 180 | Loss: 0.4215 | Correct: 50 | Time: 2.0181 sec
+Epoch 190 | Loss: 0.0729 | Correct: 50 | Time: 2.0933 sec
+Epoch 200 | Loss: 0.0009 | Correct: 50 | Time: 2.1508 sec
+Epoch 210 | Loss: 0.1317 | Correct: 50 | Time: 2.3677 sec
+Epoch 220 | Loss: 0.1539 | Correct: 50 | Time: 2.0990 sec
+Epoch 230 | Loss: 0.0343 | Correct: 50 | Time: 2.0401 sec
+Epoch 240 | Loss: 0.0342 | Correct: 50 | Time: 2.0349 sec
+Epoch 250 | Loss: 0.0026 | Correct: 50 | Time: 2.9170 sec
+Epoch 260 | Loss: 0.1987 | Correct: 50 | Time: 2.0052 sec
+Epoch 270 | Loss: 0.1841 | Correct: 50 | Time: 2.0139 sec
+Epoch 280 | Loss: 0.3283 | Correct: 50 | Time: 2.0993 sec
+Epoch 290 | Loss: 0.0670 | Correct: 50 | Time: 2.6477 sec
+Epoch 300 | Loss: 0.0065 | Correct: 50 | Time: 2.0421 sec
+Epoch 310 | Loss: 0.0164 | Correct: 50 | Time: 2.0136 sec
+Epoch 320 | Loss: 0.2884 | Correct: 50 | Time: 2.0854 sec
+Epoch 330 | Loss: 0.0081 | Correct: 50 | Time: 2.1263 sec
+Epoch 340 | Loss: 0.1606 | Correct: 50 | Time: 2.4957 sec
+Epoch 350 | Loss: 0.3290 | Correct: 50 | Time: 2.0851 sec
+Epoch 360 | Loss: 0.0208 | Correct: 50 | Time: 2.0106 sec
+Epoch 370 | Loss: 0.1243 | Correct: 50 | Time: 2.0040 sec
+Epoch 380 | Loss: 0.0253 | Correct: 50 | Time: 2.9113 sec
+Epoch 390 | Loss: 0.0006 | Correct: 50 | Time: 2.0031 sec
+Epoch 400 | Loss: 0.0033 | Correct: 50 | Time: 2.0187 sec
+Epoch 410 | Loss: 0.2500 | Correct: 50 | Time: 2.1016 sec
+Epoch 420 | Loss: 0.2291 | Correct: 50 | Time: 2.9083 sec
+Epoch 430 | Loss: 0.0041 | Correct: 50 | Time: 1.9865 sec
+Epoch 440 | Loss: 0.0065 | Correct: 50 | Time: 2.0068 sec
+Epoch 450 | Loss: 0.0643 | Correct: 50 | Time: 2.1218 sec
+Epoch 460 | Loss: 0.0033 | Correct: 50 | Time: 2.7559 sec
+Epoch 470 | Loss: 0.0051 | Correct: 50 | Time: 2.0137 sec
+Epoch 480 | Loss: 0.0207 | Correct: 50 | Time: 2.0908 sec
+Epoch 490 | Loss: 0.0380 | Correct: 50 | Time: 1.9972 sec
+
+Average Time per Epoch: 2.2007 sec
+
 - Note:
 
 Several of the tests for this assignment will only run if you are on a GPU machine and will not
