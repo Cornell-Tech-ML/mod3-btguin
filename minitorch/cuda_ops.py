@@ -472,29 +472,34 @@ def _tensor_matrix_multiply(
     #    c) Compute the dot produce for position c[i, j]
     # TODO: Implement for Task 3.4.
     sum = 0.0
-    # 1) Move across shared dimension by block dim.
+
     for idx in range(0, a_shape[-1], BLOCK_DIM):
-        if idx + pj < a_shape[-1] and i < a_shape[-2]:
+        # Load data into shared memory
+        if i < a_shape[-2] and (idx + pj) < a_shape[-1]:
             a_shared[pi, pj] = a_storage[
                 batch * a_batch_stride + i * a_strides[1] + (idx + pj) * a_strides[2]
             ]
         else:
             a_shared[pi, pj] = 0.0
-        if idx + pi < b_shape[-2] and j < b_shape[-1]:
+
+        if (idx + pi) < b_shape[-2] and j < b_shape[-1]:
             b_shared[pi, pj] = b_storage[
                 batch * b_batch_stride + (idx + pi) * b_strides[1] + j * b_strides[2]
             ]
         else:
             b_shared[pi, pj] = 0.0
+
         cuda.syncthreads()
 
-        if i < out_shape[1] and j < out_shape[2]:
-            for k in range(BLOCK_DIM):
-                sum += a_shared[pi, k] * b_shared[k, pj]
+        # Compute partial sum
+        for k in range(BLOCK_DIM):
+            sum += a_shared[pi, k] * b_shared[k, pj]
+
         cuda.syncthreads()
 
     o = batch * out_strides[0] + i * out_strides[1] + j * out_strides[2]
-    if o < out_size and i < out_shape[1] and j < out_shape[2]:
+
+    if i < out_shape[1] and j < out_shape[2] and o < out_size:
         out[o] = sum
 
 
