@@ -6,9 +6,6 @@ import minitorch
 
 import time
 
-from numba import cuda  # Ensure CUDA is imported
-
-
 
 datasets = minitorch.datasets
 FastTensorBackend = minitorch.TensorBackend(minitorch.FastOps)
