@@ -370,7 +370,7 @@ def tensor_reduce(
                 stride //= 2
             if pos == 0:
                 out_index[reduce_dim] = 0
-                out_pos = index_to_position(out_index, out_strides)
+                out_pos = index_to_pos(out_index, out_strides)
                 out[out_pos] = cache[0]
 
     return cuda.jit()(_reduce) # type: ignore
