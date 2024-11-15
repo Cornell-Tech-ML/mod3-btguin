@@ -229,13 +229,13 @@ def tensor_zip(
             # a_params = a_storage[index_to_pos(a_index, a_strides)]
             # b_params = b_storage[index_to_pos(b_index, b_strides)]
             # out[index_to_pos(out_index, out_strides)] = fn(a_params, b_params)
-            # Convert linear index to multi-dimensional index
+
             to_index(i, out_shape, out_index)
-            out_pos = index_to_position(out_index, out_strides)
+            out_pos = index_to_pos(out_index, out_strides)
             broadcast_index(out_index, out_shape, a_shape, a_index)
-            a_pos = index_to_position(a_index, a_strides)
+            a_pos = index_to_pos(a_index, a_strides)
             broadcast_index(out_index, out_shape, b_shape, b_index)
-            b_pos = index_to_position(b_index, b_strides)
+            b_pos = index_to_pos(b_index, b_strides)
             out[out_pos] = fn(a_storage[a_pos], b_storage[b_pos])
 
     return cuda.jit()(_zip)  # type: ignore
