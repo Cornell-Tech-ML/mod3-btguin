@@ -175,9 +175,24 @@ def tensor_map(
         i = cuda.blockIdx.x * cuda.blockDim.x + cuda.threadIdx.x
         # TODO: Implement for Task 3.3.
         if i < out_size:
+            # to_index(i, out_shape, out_index)
+            # broadcast_index(out_index, out_shape, in_shape, in_index)
+            # out[index_to_pos(out_index, out_strides)] = fn(in_storage[index_to_pos(in_index, in_strides)])
+            
+            # Convert linear index to multi-dimensional index
             to_index(i, out_shape, out_index)
+            
+            # Compute position in output storage
+            out_pos = index_to_position(out_index, out_strides)
+            
+            # Broadcast index to input tensor shape
             broadcast_index(out_index, out_shape, in_shape, in_index)
-            out[index_to_pos(out_index, out_strides)] = fn(in_storage[index_to_pos(in_index, in_strides)])
+            
+            # Compute position in input storage
+            in_pos = index_to_position(in_index, in_strides)
+            
+            # Apply the function
+            out[out_pos] = fn(in_storage[in_pos])
 
     return cuda.jit()(_map)  # type: ignore
 
@@ -471,34 +486,42 @@ def _tensor_matrix_multiply(
     #    b) Copy into shared memory for b matrix
     #    c) Compute the dot produce for position c[i, j]
     # TODO: Implement for Task 3.4.
-    sum = 0.0
+    sum = 0.0 
 
+    # 1) Move across shared dimension by block dim.
     for idx in range(0, a_shape[-1], BLOCK_DIM):
-        # Load data into shared memory
+        # a) Copy into shared memory for a matrix.
         if i < a_shape[-2] and (idx + pj) < a_shape[-1]:
+            # Load element from global memory to shared memory for matrix a
             a_shared[pi, pj] = a_storage[
                 batch * a_batch_stride + i * a_strides[1] + (idx + pj) * a_strides[2]
             ]
         else:
-            a_shared[pi, pj] = 0.0
+            a_shared[pi, pj] = 0.0  # Pad with zeros if indices are out of bounds
 
+        # b) Copy into shared memory for b matrix
         if (idx + pi) < b_shape[-2] and j < b_shape[-1]:
+            # Load element from global memory to shared memory for matrix b
             b_shared[pi, pj] = b_storage[
                 batch * b_batch_stride + (idx + pi) * b_strides[1] + j * b_strides[2]
             ]
         else:
-            b_shared[pi, pj] = 0.0
+            b_shared[pi, pj] = 0.0  # Pad with zeros if indices are out of bounds
 
-        cuda.syncthreads()
+        cuda.syncthreads()  # Ensure all threads have loaded data into shared memory
 
-        # Compute partial sum
-        for k in range(BLOCK_DIM):
-            sum += a_shared[pi, k] * b_shared[k, pj]
+        # c) Compute the dot product for position c[i, j]
+        if i < out_shape[1] and j < out_shape[2]:
+            for k in range(BLOCK_DIM):
+                # Accumulate the product of corresponding elements
+                sum += a_shared[pi, k] * b_shared[k, pj]
 
-        cuda.syncthreads()
+        cuda.syncthreads()  # Synchronize before loading the next sub-block
 
+    # Compute the linear index in the output storage
     o = batch * out_strides[0] + i * out_strides[1] + j * out_strides[2]
 
+    # Write the result to global memory if indices are within bounds
     if i < out_shape[1] and j < out_shape[2] and o < out_size:
         out[o] = sum
 
