@@ -183,13 +183,13 @@ def tensor_map(
             to_index(i, out_shape, out_index)
             
             # Compute position in output storage
-            out_pos = index_to_position(out_index, out_strides)
+            out_pos = index_to_pos(out_index, out_strides)
             
             # Broadcast index to input tensor shape
             broadcast_index(out_index, out_shape, in_shape, in_index)
             
             # Compute position in input storage
-            in_pos = index_to_position(in_index, in_strides)
+            in_pos = index_to_pos(in_index, in_strides)
             
             # Apply the function
             out[out_pos] = fn(in_storage[in_pos])
