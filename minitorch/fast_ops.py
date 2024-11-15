@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING, TypeVar, Any
 import numpy as np
 from numba import prange
 from numba import njit as _njit
-from numba import types
 
 
 from .tensor_data import (
@@ -21,7 +20,7 @@ if TYPE_CHECKING:
     from typing import Callable, Optional
 
     from .tensor import Tensor
-    from .tensor_data import Index, Shape, Storage, Strides
+    from .tensor_data import Shape, Storage, Strides
 
 # TIP: Use `NUMBA_DISABLE_JIT=1 pytest tests/ -m task3_1` to run these tests without JIT.
 
@@ -32,6 +31,7 @@ Fn = TypeVar("Fn")
 
 
 def njit(fn: Fn, **kwargs: Any) -> Fn:
+    """JIT compile a function with Numba and return the compiled function."""
     return _njit(inline="always", **kwargs)(fn)  # type: ignore
 
 
@@ -384,7 +384,7 @@ def tensor_reduce(
 
             # Store the result
             out[out_pos] = acc
-            
+
     return njit(_reduce, parallel=True)  # type: ignore
 
 
@@ -488,10 +488,13 @@ def _tensor_matrix_multiply(
                     sum += a_storage[a_pos] * b_storage[b_pos]
 
                 # Compute position in 'out' storage
-                out_pos = int(n * out_batch_stride + i * out_i_stride + j * out_j_stride)
+                out_pos = int(
+                    n * out_batch_stride + i * out_i_stride + j * out_j_stride
+                )
 
                 # Write the accumulated sum to the output storage
                 out[out_pos] = sum
+
 
 tensor_matrix_multiply = njit(_tensor_matrix_multiply, parallel=True)
 assert tensor_matrix_multiply is not None
