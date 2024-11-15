@@ -322,13 +322,13 @@ def tensor_reduce(
         reduce_dim: int,
         reduce_value: float,
     ) -> None:
-        # BLOCK_DIM = 1024 ## added this
         cache = cuda.shared.array(BLOCK_DIM, numba.float64)
         out_index = cuda.local.array(MAX_DIMS, numba.int32)
         out_pos = cuda.blockIdx.x
         pos = cuda.threadIdx.x
 
         # TODO: Implement for Task 3.3.
+        BLOCK_DIM = 1024 # Added this
         a_index = cuda.local.array(MAX_DIMS, numba.int32)  # Added this
         if out_pos < out_size:
             to_index(out_pos, out_shape, out_index)
