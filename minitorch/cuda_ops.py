@@ -325,6 +325,7 @@ def tensor_reduce(
         BLOCK_DIM = 1024 ## added this
         cache = cuda.shared.array(BLOCK_DIM, numba.float64)
         out_index = cuda.local.array(MAX_DIMS, numba.int32)
+        a_index = cuda.local.array(MAX_DIMS, dtype=int32)  # Added this
         out_pos = cuda.blockIdx.x
         pos = cuda.threadIdx.x
 
