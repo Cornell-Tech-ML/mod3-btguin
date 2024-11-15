@@ -175,23 +175,10 @@ def tensor_map(
         i = cuda.blockIdx.x * cuda.blockDim.x + cuda.threadIdx.x
         # TODO: Implement for Task 3.3.
         if i < out_size:
-            # to_index(i, out_shape, out_index)
-            # broadcast_index(out_index, out_shape, in_shape, in_index)
-            # out[index_to_pos(out_index, out_strides)] = fn(in_storage[index_to_pos(in_index, in_strides)])
-            
-            # Convert linear index to multi-dimensional index
             to_index(i, out_shape, out_index)
-            
-            # Compute position in output storage
             out_pos = index_to_pos(out_index, out_strides)
-            
-            # Broadcast index to input tensor shape
             broadcast_index(out_index, out_shape, in_shape, in_index)
-            
-            # Compute position in input storage
             in_pos = index_to_pos(in_index, in_strides)
-            
-            # Apply the function
             out[out_pos] = fn(in_storage[in_pos])
 
     return cuda.jit()(_map)  # type: ignore
@@ -236,12 +223,20 @@ def tensor_zip(
 
         # TODO: Implement for Task 3.3.
         if i < out_size:
+            # to_index(i, out_shape, out_index)
+            # broadcast_index(out_index, out_shape, a_shape, a_index)
+            # broadcast_index(out_index, out_shape, b_shape, b_index)
+            # a_params = a_storage[index_to_pos(a_index, a_strides)]
+            # b_params = b_storage[index_to_pos(b_index, b_strides)]
+            # out[index_to_pos(out_index, out_strides)] = fn(a_params, b_params)
+            # Convert linear index to multi-dimensional index
             to_index(i, out_shape, out_index)
+            out_pos = index_to_position(out_index, out_strides)
             broadcast_index(out_index, out_shape, a_shape, a_index)
+            a_pos = index_to_position(a_index, a_strides)
             broadcast_index(out_index, out_shape, b_shape, b_index)
-            a_params = a_storage[index_to_pos(a_index, a_strides)]
-            b_params = b_storage[index_to_pos(b_index, b_strides)]
-            out[index_to_pos(out_index, out_strides)] = fn(a_params, b_params)
+            b_pos = index_to_position(b_index, b_strides)
+            out[out_pos] = fn(a_storage[a_pos], b_storage[b_pos])
 
     return cuda.jit()(_zip)  # type: ignore
 
