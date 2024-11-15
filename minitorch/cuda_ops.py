@@ -357,7 +357,7 @@ def tensor_reduce(
             temp = reduce_value
             while i < reduce_size:
                 a_index[reduce_dim] = i
-                a_pos = index_to_position(a_index, a_strides)
+                a_pos = index_to_pos(a_index, a_strides)
                 temp = fn(temp, a_storage[a_pos])
                 i += BLOCK_DIM
             cache[pos] = temp
