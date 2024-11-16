@@ -32,7 +32,7 @@ UserShape: TypeAlias = Sequence[int]
 UserStrides: TypeAlias = Sequence[int]
 
 
-def index_to_pos(index: Index, strides: Strides) -> int:
+def index_to_position(index: Index, strides: Strides) -> int:
     """Converts a multidimensional tensor `index` into a single-dimensional position in
     storage based on strides.
 
@@ -276,7 +276,7 @@ class TensorData:
                 raise IndexingError(f"Negative indexing for {aindex} not supported.")
 
         # Call fast indexing.
-        return index_to_pos(array(index), self._strides)
+        return index_to_position(array(index), self._strides)
 
     def indices(self) -> Iterable[UserIndex]:
         """Generate all possible indices for the tensor.

@@ -10,7 +10,7 @@ from numba import njit as _njit
 from .tensor_data import (
     MAX_DIMS,
     broadcast_index,
-    index_to_pos,
+    index_to_position,
     shape_broadcast,
     to_index,
 )
@@ -36,7 +36,7 @@ def njit(fn: Fn, **kwargs: Any) -> Fn:
 
 
 to_index = njit(to_index)
-index_to_position = njit(index_to_pos)
+index_to_position = njit(index_to_position)
 broadcast_index = njit(broadcast_index)
 
 

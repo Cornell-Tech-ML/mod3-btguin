@@ -9,7 +9,7 @@ from . import operators
 from .tensor_data import (
     MAX_DIMS,
     broadcast_index,
-    index_to_pos,
+    index_to_position,
     shape_broadcast,
     to_index,
 )
@@ -279,8 +279,8 @@ def tensor_map(fn: Callable[[float], float]) -> Any:
         for i in range(len(out)):
             to_index(i, out_shape, out_index)
             broadcast_index(out_index, out_shape, in_shape, in_index)
-            o = index_to_pos(out_index, out_strides)
-            j = index_to_pos(in_index, in_strides)
+            o = index_to_position(out_index, out_strides)
+            j = index_to_position(in_index, in_strides)
             out[o] = fn(in_storage[j])
 
     return _map
@@ -337,11 +337,11 @@ def tensor_zip(fn: Callable[[float, float], float]) -> Any:
 
         for i in range(len(out)):
             to_index(i, out_shape, out_index)
-            o = index_to_pos(out_index, out_strides)
+            o = index_to_position(out_index, out_strides)
             broadcast_index(out_index, out_shape, a_shape, a_index)
-            j = index_to_pos(a_index, a_strides)
+            j = index_to_position(a_index, a_strides)
             broadcast_index(out_index, out_shape, b_shape, b_index)
-            k = index_to_pos(b_index, b_strides)
+            k = index_to_position(b_index, b_strides)
             out[o] = fn(a_storage[j], b_storage[k])
         # END ASSIGN2.2
 
@@ -379,10 +379,10 @@ def tensor_reduce(fn: Callable[[float, float], float]) -> Any:
         reduce_size = a_shape[reduce_dim]
         for i in range(len(out)):
             to_index(i, out_shape, out_index)
-            o = index_to_pos(out_index, out_strides)
+            o = index_to_position(out_index, out_strides)
             for s in range(reduce_size):
                 out_index[reduce_dim] = s
-                j = index_to_pos(out_index, a_strides)
+                j = index_to_position(out_index, a_strides)
                 out[o] = fn(out[o], a_storage[j])
         # END ASSIGN 2.2
 

@@ -14,7 +14,7 @@ from .tensor_data import (
     Strides,
     TensorData,
     broadcast_index,
-    index_to_pos,
+    index_to_position,
     shape_broadcast,
     to_index,
 )
@@ -40,7 +40,7 @@ def jit(fn: Callable, **kwargs: Any) -> FakeCUDAKernel:
 
 
 to_index = device_jit(to_index)
-index_to_pos = device_jit(index_to_pos)
+index_to_position = device_jit(index_to_position)
 broadcast_index = device_jit(broadcast_index)
 
 THREADS_PER_BLOCK = 32
@@ -181,9 +181,9 @@ def tensor_map(
         # TODO: Implement for Task 3.3.
         if i < out_size:
             to_index(i, out_shape, out_index)
-            out_pos = index_to_pos(out_index, out_strides)
+            out_pos = index_to_position(out_index, out_strides)
             broadcast_index(out_index, out_shape, in_shape, in_index)
-            in_pos = index_to_pos(in_index, in_strides)
+            in_pos = index_to_position(in_index, in_strides)
             out[out_pos] = fn(in_storage[in_pos])
 
     return cuda.jit()(_map)  # type: ignore
@@ -229,11 +229,11 @@ def tensor_zip(
         # TODO: Implement for Task 3.3.
         if i < out_size:
             to_index(i, out_shape, out_index)
-            out_pos = index_to_pos(out_index, out_strides)
+            out_pos = index_to_position(out_index, out_strides)
             broadcast_index(out_index, out_shape, a_shape, a_index)
-            a_pos = index_to_pos(a_index, a_strides)
+            a_pos = index_to_position(a_index, a_strides)
             broadcast_index(out_index, out_shape, b_shape, b_index)
-            b_pos = index_to_pos(b_index, b_strides)
+            b_pos = index_to_position(b_index, b_strides)
             out[out_pos] = fn(a_storage[a_pos], b_storage[b_pos])
 
     return cuda.jit()(_zip)  # type: ignore
@@ -346,7 +346,7 @@ def tensor_reduce(
             temp = reduce_value
             while i < reduce_size:
                 a_index[reduce_dim] = i
-                a_pos = index_to_pos(a_index, a_strides)
+                a_pos = index_to_position(a_index, a_strides)
                 temp = fn(temp, a_storage[a_pos])
                 i += BLOCK_DIM
             cache[pos] = temp
@@ -359,7 +359,7 @@ def tensor_reduce(
                 stride //= 2
             if pos == 0:
                 out_index[reduce_dim] = 0
-                out_pos = index_to_pos(out_index, out_strides)
+                out_pos = index_to_position(out_index, out_strides)
                 out[out_pos] = cache[0]
 
     return cuda.jit()(_reduce)  # type: ignore
