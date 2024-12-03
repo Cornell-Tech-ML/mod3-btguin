@@ -148,8 +148,7 @@ class CudaOps(TensorOps):
 # Implement
 
 
-def tensor_map(
-    fn: Callable[[float], float]) -> Any:
+def tensor_map(fn: Callable[[float], float]) -> Any:
     """CUDA higher-order tensor map function. ::
 
       fn_map = tensor_map(fn)
@@ -178,7 +177,7 @@ def tensor_map(
         out_index = cuda.local.array(MAX_DIMS, numba.int32)
         in_index = cuda.local.array(MAX_DIMS, numba.int32)
         i = cuda.blockIdx.x * cuda.blockDim.x + cuda.threadIdx.x
-        
+
         if i < out_size:
             to_index(i, out_shape, out_index)
             broadcast_index(out_index, out_shape, in_shape, in_index)
@@ -261,7 +260,7 @@ def _sum_practice(out: Storage, a: Storage, size: int) -> None:
 
     """
     BLOCK_DIM = 32
-     # ASSIGN 3.3
+    # ASSIGN 3.3
     cache = cuda.shared.array(BLOCK_DIM, numba.float64)
     i = cuda.blockIdx.x * cuda.threadIdx.x
     pos = cuda.threadIdx.x
@@ -278,10 +277,11 @@ def _sum_practice(out: Storage, a: Storage, size: int) -> None:
             if pos % (j * 2) == 0:
                 cache[pos] += cache[pos + j]
             cuda.syncthreads()
-        
+
         if pos == 0:
             out[cuda.blockIdx.x] = cache[0]
     # END ASSIGN 3.3
+
 
 jit_sum_practice = cuda.jit()(_sum_practice)
 
@@ -326,23 +326,23 @@ def tensor_reduce(
         reduce_value: float,
     ) -> None:
         BLOCK_DIM = 1024
-        
+
         # ASSIGN.3
         cache = cuda.shared.array(BLOCK_DIM, numba.float64)
         out_index = cuda.local.array(MAX_DIMS, numba.int32)
         out_pos = cuda.blockIdx.x
         pos = cuda.threadIdx.x
         cache[pos] = reduce_value
-        
+
         if out_pos < out_size:
             to_index(out_pos, out_shape, out_index)
             o = index_to_position(out_index, out_strides)
-            
+
             out_index[reduce_dim] = out_index[reduce_dim] * BLOCK_DIM + pos
             if out_index[reduce_dim] < a_shape[reduce_dim]:
                 in_a = index_to_position(out_index, a_strides)
                 cache[pos] = a_storage[in_a]
-                
+
             cuda.syncthreads()
             x = 0
             while 2**x < BLOCK_DIM:
@@ -351,7 +351,7 @@ def tensor_reduce(
                     cache[pos] = fn(cache[pos], cache[pos + j])
                 cuda.syncthreads()
                 x += 1
-                
+
             if pos == 0:
                 out[o] = cache[0]
         # END ASSIGN.3
@@ -390,7 +390,7 @@ def _mm_practice(out: Storage, a: Storage, b: Storage, size: int) -> None:
         size (int): size of the square
 
     """
-    BLOCK_DIM = 32 
+    BLOCK_DIM = 32
     # ASSIGN_3
     a_shared = cuda.shared.array((BLOCK_DIM, BLOCK_DIM), numba.float64)
     b_shared = cuda.shared.array((BLOCK_DIM, BLOCK_DIM), numba.float64)
@@ -411,6 +411,7 @@ def _mm_practice(out: Storage, a: Storage, b: Storage, size: int) -> None:
 
     out[size * i + j] = accum
     # END ASSIGN_3
+
 
 jit_mm_practice = cuda.jit(_mm_practice)
 # jit_mm_practice = jit(_mm_practice)
@@ -492,6 +493,7 @@ def _tensor_matrix_multiply(
     if i < out_shape[1] and j < out_shape[2]:
         out[out_strides[0] * batch + out_strides[1] * i + out_strides[2] * j] = accum
     # END ASSIGN 3.4
-   
+
+
 tensor_matrix_multiply = cuda.jit(_tensor_matrix_multiply)
 # tensor_matrix_multiply = jit(_tensor_matrix_multiply)
