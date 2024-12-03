@@ -32,10 +32,10 @@ class Network(minitorch.Module):
         self.layer3 = Linear(hidden, 1, backend)
 
     def forward(self, x):
-        # ASSIGN3-5
-        batch, in_size = x.shape
-        return x.view(batch, in_size) @ self.weights.value + self.bias.value
-        # END ASSIGN3-5
+        # Apply layers sequentially with ReLU activation
+        h = self.layer1.forward(x).relu()
+        h = self.layer2.forward(h).relu()
+        return self.layer3.forward(h).sigmoid()
 
 
 class Linear(minitorch.Module):
@@ -48,8 +48,10 @@ class Linear(minitorch.Module):
         self.out_size = out_size
 
     def forward(self, x):
-        # TODO: Implement for Task 3.5.
-        return x @ self.weights.value + self.bias.value
+        # ASSIGN3-5
+        batch, in_size = x.shape
+        return x.view(batch, in_size) @ self.weights.value + self.bias.value
+        # END ASSIGN3-5
 
 
 class FastTrain:
