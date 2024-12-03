@@ -262,7 +262,8 @@ def _sum_practice(out: Storage, a: Storage, size: int) -> None:
     BLOCK_DIM = 32
     # ASSIGN 3.3
     cache = cuda.shared.array(BLOCK_DIM, numba.float64)
-    i = cuda.blockIdx.x * cuda.blockDim.x + cuda.threadIdx.x
+    # i = cuda.blockIdx.x * cuda.threadIdx.x
+    i = cuda.blockIdx.x * cuda.blockDim.x + cuda.threadIdx.x ## Changed this
     pos = cuda.threadIdx.x
 
     if i < size:
@@ -290,7 +291,8 @@ def sum_practice(a: Tensor) -> TensorData:
     """Sums elements in a tensor using a CUDA kernel and returns the result tensor."""
     (size,) = a.shape
     threadsperblock = THREADS_PER_BLOCK
-    blockspergrid = (size + THREADS_PER_BLOCK - 1) // THREADS_PER_BLOCK
+    # blockspergrid = (size // THREADS_PER_BLOCK) + 1
+    blockspergrid = (size + THREADS_PER_BLOCK - 1) // THREADS_PER_BLOCK ## Changed this 
     out = TensorData([0.0 for i in range(2)], (2,))
     out.to_cuda_()
     jit_sum_practice[blockspergrid, threadsperblock](

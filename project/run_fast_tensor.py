@@ -32,10 +32,10 @@ class Network(minitorch.Module):
         self.layer3 = Linear(hidden, 1, backend)
 
     def forward(self, x):
-        # TODO: Implement for Task 3.5.
-        y = self.layer1.forward(x).relu()
-        z = self.layer2.forward(y).relu()
-        return self.layer3.forward(z).sigmoid()
+        # ASSIGN3-5
+        batch, in_size = x.shape
+        return x.view(batch, in_size) @ self.weights.value + self.bias.value
+        # END ASSIGN3-5
 
 
 class Linear(minitorch.Module):
