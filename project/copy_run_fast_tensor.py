@@ -32,10 +32,10 @@ class Network(minitorch.Module):
         self.layer3 = Linear(hidden, 1, backend)
 
     def forward(self, x):
-        # Apply layers sequentially with ReLU activation
-        h = self.layer1.forward(x).relu()
-        h = self.layer2.forward(h).relu()
-        return self.layer3.forward(h).sigmoid()
+        # TODO: Implement for Task 3.5.
+        x = self.layer1.forward(x).relu()
+        x = self.layer2.forward(x).relu()
+        return self.layer3.forward(x).sigmoid()
 
 
 class Linear(minitorch.Module):
@@ -48,10 +48,11 @@ class Linear(minitorch.Module):
         self.out_size = out_size
 
     def forward(self, x):
-        # ASSIGN3-5
-        batch, in_size = x.shape
-        return x.view(batch, in_size) @ self.weights.value + self.bias.value
-        # END ASSIGN3-5
+        # TODO: Implement for Task 3.5.
+        x = x.view(*x.shape, 1)
+        w = self.weights.value.view(1, *self.weights.value.shape)
+        bias = self.bias.value.view(1, self.out_size)
+        return (x * w).sum(1).view(x.shape[0], self.out_size) + bias
 
 
 class FastTrain:
@@ -85,6 +86,8 @@ class FastTrain:
                 optim.zero_grad()
                 X = minitorch.tensor(X_shuf[i : i + BATCH], backend=self.backend)
                 y = minitorch.tensor(y_shuf[i : i + BATCH], backend=self.backend)
+                # Forward
+
                 out = self.model.forward(X).view(y.shape[0])
                 prob = (out * y) + (out - 1.0) * (y - 1.0)
                 loss = -prob.log()
@@ -104,7 +107,6 @@ class FastTrain:
             if epoch % 10 == 0 or epoch == max_epochs:
                 X = minitorch.tensor(data.X, backend=self.backend)
                 y = minitorch.tensor(data.y, backend=self.backend)
-
                 out = self.model.forward(X).view(y.shape[0])
                 y2 = minitorch.tensor(data.y)
                 correct = int(((out.detach() > 0.5) == y2).sum()[0])
