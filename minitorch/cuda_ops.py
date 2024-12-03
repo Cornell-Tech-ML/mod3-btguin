@@ -291,8 +291,8 @@ def sum_practice(a: Tensor) -> TensorData:
     """Sums elements in a tensor using a CUDA kernel and returns the result tensor."""
     (size,) = a.shape
     threadsperblock = THREADS_PER_BLOCK
-    # blockspergrid = (size // THREADS_PER_BLOCK) + 1
-    blockspergrid = (size + THREADS_PER_BLOCK - 1) // THREADS_PER_BLOCK  ## Changed this
+    blockspergrid = (size // THREADS_PER_BLOCK) + 1
+    # blockspergrid = (size + THREADS_PER_BLOCK - 1) // THREADS_PER_BLOCK  ## Changed this
     out = TensorData([0.0 for i in range(2)], (2,))
     out.to_cuda_()
     jit_sum_practice[blockspergrid, threadsperblock](
